@@ -12,13 +12,13 @@ public class ReceiverSessionManager {
     public void connectSession(String host, int port) {
 
         try {
-
+        	if(socket == null) {
             socket = new Socket(host, port);
 
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             System.out.println("Receiver FIX Session Connected");
-
+        	}
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -43,4 +43,27 @@ public class ReceiverSessionManager {
 
         return "";
     }
+    
+    public void disconnectSession() {
+    	try {
+
+    		if(reader != null) {
+    			reader.close();
+    			reader = null;
+    		}
+
+    		if(socket != null) {
+    			socket.close();
+    			socket = null;
+    		}
+
+    		System.out.println("Receiver Session Disconnected");
+
+    	} catch (Exception e) {
+
+    		e.printStackTrace();
+    	}
+
+    }
+
 }

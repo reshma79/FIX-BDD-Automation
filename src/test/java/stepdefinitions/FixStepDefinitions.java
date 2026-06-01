@@ -2,6 +2,7 @@ package stepdefinitions;
 
 import implementation.*;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.After;
 import io.cucumber.java.en.*;
 
 import java.util.Map;
@@ -82,5 +83,17 @@ public class FixStepDefinitions {
     public void validateReceiverFixMessage(DataTable table) {
 
         validator.validateReceiverSideMessage(table);
+    }
+
+    @After
+    public void disconnectSession() {
+    	
+    	clientSession.disconnectSession();
+
+    	receiverSession.disconnectSession();
+    	
+    	engineManager.stopEngine();
+
+        System.out.println("Sessions Closed");
     }
 }

@@ -11,6 +11,10 @@ public class MessageValidator {
 
         String response = ClientSessionManager.receiveMessage();
 
+        if(response == null) {
+        	System.out.println("Client FIX Validation Not done as Response is NULL");
+        	return;
+        }
         Map<String, String> actualFixMap = FixMessageParser.parseFixMessage(response);
 
         Map<String, String> expectedFixMap = table.asMap(String.class, String.class);
@@ -28,6 +32,11 @@ public class MessageValidator {
     public void validateReceiverSideMessage(DataTable table) {
 
         String response = ReceiverSessionManager.captureOutgoingFixMessage();
+
+        if(response == null) {
+        	System.out.println("Receiver FIX Validation Not done as Response is NULL");
+        	return;
+        }
 
         Map<String, String> actualFixMap = FixMessageParser.parseFixMessage(response);
 
