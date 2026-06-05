@@ -2,10 +2,15 @@ package implementation;
 
 import java.util.UUID;
 
+import quickfix.fix44.NewOrderSingle;
+import quickfix.fix44.OrderCancelReplaceRequest;
+import quickfix.fix44.OrderCancelRequest;
+
 public class OrderManager {
 
     FixMessageBuilder builder = new FixMessageBuilder();
-
+//    QuickFixSessionManager sessionManager = new QuickFixSessionManager();
+    
     String currentOrderId;
     String symbol;
 
@@ -15,10 +20,7 @@ public class OrderManager {
 
         currentOrderId = UUID.randomUUID().toString();
 
-        String sideValue = getSideValue(side);
-
-        String fixMessage = builder.buildNewOrderSingle(currentOrderId, symbol, quantity, price, sideValue);
-
+        NewOrderSingle fixMessage = builder.buildNewOrderSingle(currentOrderId, symbol, quantity, price, side);
         ClientSessionManager.sendMessage(fixMessage);
     }
 
@@ -26,7 +28,7 @@ public class OrderManager {
 
         String modifyOrderId = UUID.randomUUID().toString();
 
-        String fixMessage = builder.buildModifyOrder(modifyOrderId, currentOrderId, symbol, quantity, price);
+        OrderCancelReplaceRequest fixMessage = builder.buildModifyOrder(modifyOrderId, currentOrderId, symbol, quantity, price);
 
         currentOrderId = modifyOrderId;
 
@@ -37,15 +39,11 @@ public class OrderManager {
 
         String cancelOrderId = UUID.randomUUID().toString();
 
-        String fixMessage = builder.buildCancelOrder(cancelOrderId, currentOrderId, symbol);
+        OrderCancelRequest fixMessage = builder.buildCancelOrder(cancelOrderId, currentOrderId, symbol);
 
         currentOrderId = cancelOrderId;
 
         ClientSessionManager.sendMessage(fixMessage);
     }
-
-    private String getSideValue(String side) {
-
-        return side.equalsIgnoreCase("BUY") ? "1" : "2";
-    }
+    
 }

@@ -1,87 +1,34 @@
 package implementation;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
+import quickfix.Message;
 
 public class ClientSessionManager {
 
-    private static Socket socket;
-    private static PrintWriter writer;
-    private static BufferedReader reader;
+    private static final QuickFixApplication application = new QuickFixApplication();
+    private static final QuickFixSessionManager sessionManager = new QuickFixSessionManager();
 
-    public void connectSession(String host, int port) {
+    public static void connect(String configFile) {
 
-        try {
-        	if(socket == null) {
-            socket = new Socket(host, port);
-
-            writer = new PrintWriter(socket.getOutputStream(), true);
-
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        	}
-            System.out.println("Client FIX Session Connected");
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
+        sessionManager.startSession(configFile, application);
     }
 
-    public static void sendMessage(String message) {
+    public static void disconnect() {
 
-        message = message.replace("|", "\001");
-
-        writer.println(message);
-
-        System.out.println("Client Sent FIX Message:");
-        System.out.println(message);
+        sessionManager.stopSession();
     }
 
-    public static String receiveMessage() {
+    public static void sendMessage(Message message) {
 
-        try {
-
-            String response = reader.readLine();
-
-            System.out.println("Client Received:");
-            System.out.println(response);
-
-            return response;
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
-
-        return "";
+        sessionManager.sendMessage(message);
     }
-    
-    public void disconnectSession() {
-    	try {
 
-    		if(reader != null) {
-    			reader.close();
-    			reader = null;
-    		}
+    public static Message getLastIncomingMessage() {
 
-    		if(writer != null) {
-    			writer.close();
-    			writer = null;
-    		}
+        return application.getLastIncomingMessage();
+    }
 
-    		if(socket != null) {
-    			socket.close();
-    			socket = null;
-    		}
+    public static Message getLastOutgoingMessage() {
 
-    		System.out.println("Client Session Disconnected");
-
-    	} catch (Exception e) {
-
-    		e.printStackTrace();
-    	}
-
+        return application.getLastOutgoingMessage();
     }
 }

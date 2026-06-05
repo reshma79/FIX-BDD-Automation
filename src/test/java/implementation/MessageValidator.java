@@ -4,9 +4,11 @@ import io.cucumber.datatable.DataTable;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import quickfix.Message;
 
 public class MessageValidator {
 
+	/*
     public void validateClientExecutionReport(DataTable table) {
 
         String response = ClientSessionManager.receiveMessage();
@@ -50,5 +52,43 @@ public class MessageValidator {
         }
 
         System.out.println("Receiver FIX Validation Passed");
+    }
+    */
+    public static void validateClientExecutionReport(DataTable table) {
+
+    	Map<String, String> expectedData = table.asMaps(String.class, String.class).get(0);
+    	
+        validate(ClientSessionManager.getLastIncomingMessage(), expectedData);
+    }
+
+    public static void validateReceiverSideMessage(DataTable table) {
+
+    	Map<String, String> expectedData = table.asMaps(String.class, String.class).get(0);
+    	
+        validate(ReceiverSessionManager.getLastIncomingMessage(), expectedData);
+    }
+    
+    public static void validate(Message actualMessage, Map<String, String> expectedTags) {
+
+        try {
+
+            for (Map.Entry<String, String> entry : expectedTags.entrySet()) {
+
+                String tag = entry.getKey();
+                String expectedValue = entry.getValue();
+
+                String actualValue = actualMessage.getString(Integer.parseInt(tag));
+
+                assertEquals(
+                        "Validation Failed For Tag " + tag,
+                        expectedValue,
+                        actualValue
+                );
+            }
+
+        } catch (Exception e) {
+
+            throw new RuntimeException("FIX Message Validation Failed", e);
+        }
     }
 }

@@ -3,6 +3,7 @@ package stepdefinitions;
 import implementation.*;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.After;
+import io.cucumber.java.AfterAll;
 import io.cucumber.java.en.*;
 
 import java.util.Map;
@@ -10,8 +11,10 @@ import java.util.Map;
 public class FixStepDefinitions {
 
     EngineManager engineManager = new EngineManager();
-    ClientSessionManager clientSession = new ClientSessionManager();
-    ReceiverSessionManager receiverSession = new ReceiverSessionManager();
+//    ClientSessionManager clientSession = new ClientSessionManager();
+//    ReceiverSessionManager receiverSession = new ReceiverSessionManager();
+//    QuickFixSessionManager clientSession = new QuickFixSessionManager();
+//    QuickFixSessionManager receiverSession = new QuickFixSessionManager();
     OrderManager orderManager = new OrderManager();
     MessageValidator validator = new MessageValidator();
 
@@ -20,7 +23,7 @@ public class FixStepDefinitions {
 
         engineManager.startEngine();
     }
-
+/*
     @Given("client FIX session is connected with:")
     public void connectClientSession(DataTable table) {
 
@@ -42,12 +45,25 @@ public class FixStepDefinitions {
                 Integer.parseInt(data.get("port"))
         );
     }
+*/
+    @Given("Client FIX session is started using config {configFile}")
+    public void connectClientSession(String configFile) {
+
+    	ClientSessionManager.connect(configFile);
+
+    }
+
+    @Given("Receiver FIX session is started using config {string}")
+    public void startReceiverSession(String configFile) {
+
+        ReceiverSessionManager.connect(configFile);
+    }
 
     @When("user places FIX order:")
     public void placeOrder(DataTable table) {
 
-        Map<String, String> data = table.asMap(String.class, String.class);
-
+        Map<String, String> data = table.asMaps(String.class, String.class).get(0);
+        
         orderManager.placeOrder(
                 data.get("symbol"),
                 data.get("quantity"),
@@ -85,12 +101,11 @@ public class FixStepDefinitions {
         validator.validateReceiverSideMessage(table);
     }
 
-    @After
+    @AfterAll
     public void disconnectSession() {
     	
-    	clientSession.disconnectSession();
-
-    	receiverSession.disconnectSession();
+    	ClientSessionManager.disconnect();
+    	ReceiverSessionManager.disconnect();
     	
     	engineManager.stopEngine();
 

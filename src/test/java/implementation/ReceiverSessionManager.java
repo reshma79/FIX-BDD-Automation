@@ -1,69 +1,29 @@
 package implementation;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.Socket;
+import quickfix.Message;
 
 public class ReceiverSessionManager {
 
-    private static Socket socket;
-    private static BufferedReader reader;
+    private static final QuickFixApplication application = new QuickFixApplication();
+    private static final QuickFixSessionManager sessionManager = new QuickFixSessionManager();
 
-    public void connectSession(String host, int port) {
+    public static void connect(String configFile) {
 
-        try {
-        	if(socket == null) {
-            socket = new Socket(host, port);
-
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            System.out.println("Receiver FIX Session Connected");
-        	}
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
+        sessionManager.startSession(configFile, application);
     }
 
-    public static String captureOutgoingFixMessage() {
+    public static void disconnect() {
 
-        try {
-
-            String message = reader.readLine();
-
-            System.out.println("Receiver Captured FIX:");
-            System.out.println(message);
-
-            return message;
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
-
-        return "";
-    }
-    
-    public void disconnectSession() {
-    	try {
-
-    		if(reader != null) {
-    			reader.close();
-    			reader = null;
-    		}
-
-    		if(socket != null) {
-    			socket.close();
-    			socket = null;
-    		}
-
-    		System.out.println("Receiver Session Disconnected");
-
-    	} catch (Exception e) {
-
-    		e.printStackTrace();
-    	}
-
+        sessionManager.stopSession();
     }
 
+    public static Message getLastIncomingMessage() {
+
+        return application.getLastIncomingMessage();
+    }
+
+    public static Message getLastOutgoingMessage() {
+
+        return application.getLastOutgoingMessage();
+    }
 }

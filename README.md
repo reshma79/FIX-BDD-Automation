@@ -5,10 +5,11 @@
 Develop an enterprise-grade FIX Protocol automation framework using:
 
 - Java
-- BDD
-- Cucumber
-- Socket Programming
-- Config-Driven FIX Templates
+- Cucumber BDD
+- Maven
+- JUnit
+- QuickFIX/J
+- Allure Reporting
 
 The framework validates FIX message flow at both:
 
@@ -42,7 +43,7 @@ Framework starts and validates FIX engine availability.
 
 ## 2. Client Session Connection
 
-Framework establishes socket connection with AUT from sender/client side.
+Framework establishes QuickFix/J connection with AUT from sender/client side.
 
 Example:
 
@@ -53,7 +54,7 @@ Client → AUT
 
 ## 3. Receiver Session Connection
 
-Framework establishes socket connection with receiver/exchange side to capture outgoing FIX messages.
+Framework establishes QuickFix/J connection with receiver/exchange side to capture outgoing FIX messages.
 
 Example:
 
@@ -69,13 +70,25 @@ src
  └── test
       ├── java
       │     ├── implementation
+      │		│     ├── QuickFixSessionManager.java 	 
+      │		│     ├── QuickFixApplication.java 	 
+      │		│     ├── ClientSessionManager.java 	 
+      │		│     ├── ReceiverSessionManager.java 	 
+      │		│     ├── OrderManager.java 	 
+      │		│     ├── MessageValidator.java 	 
+      │		│     ├── FixMessageBuilder.java 	 
+      │		│     └── EngineManager.java 	 
       │     ├── runner
-      │     ├── stepdefinitions
-      │     └── utils
-      │
+      │		│     └── TestRunner.java 	 
+      │     └── stepdefinitions
+      │		      └── FixStepDefinitions.java 	 
       └── resources
             ├── config
+       		│     ├── quickfixj_Client.cfg 	 
+       		│     └── quickfixj_Receiver.cfg 	 
             └── features
+       		      └── FixOrderFlow.feature 	 
+            
 ```
 
 ---
@@ -89,11 +102,13 @@ Step Definitions
     ↓
 OrderManager
     ↓
-FixMessageBuilder
-    ↓
-FixMessageConverter
-    ↓
 ClientSessionManager
+    ↓
+QuickFixSessionManager
+    ↓
+QuickFixApplication
+    ↓
+QuickFIX/J Session
     ↓
 AUT (FIX Engine)
     ↓
@@ -122,6 +137,7 @@ This layer is fully data-driven.
 Reads data from feature file and invokes framework business methods.
 
 Example:
+- establishing connections
 - place order
 - modify order
 - cancel order
@@ -142,30 +158,33 @@ This layer does not contain FIX formatting logic.
 
 ---
 
-## 4. FixMessageBuilder
+## 4. ClientSessionManager
 
-Creates dynamic FIX messages using:
-- config templates
-- runtime test data
-- placeholder replacement
-
----
-
-## 5. FixMessageConverter
-
-Converts FIX template into final FIX string format.
-
-Maintains proper FIX tag sequence.
-
----
-
-## 6. ClientSessionManager
-
-Establishes socket connection with AUT.
+Establishes QuickFIX/J connection with AUT.
 
 Responsibilities:
-- send FIX requests
-- receive execution reports
+- Manage Client FIX session
+- Send FIX messages
+- Retrieve Client responses
+
+---
+
+## 5. QuickFixSessionManager
+
+Responsibilities:
+- Load cfg file
+- Start FIX session
+- Stop FIX session
+- Send FIX messages
+
+---
+
+## 6. QuickFixApplication
+
+Responsibilities:
+- Receive incoming FIX messages
+- Capture outgoing FIX messages
+- Handle FIX callbacks
 
 ---
 
@@ -187,8 +206,8 @@ and forwards FIX messages to receiver side.
 Captures outgoing FIX messages sent by AUT.
 
 Used for:
-- end-to-end validation
-- exchange-side validation
+- Manage Receiver FIX session
+- Retrieve Receiver-side messages
 - outgoing FIX verification
 
 ---
@@ -213,37 +232,48 @@ using:
 | Language | Java |
 | Framework | Cucumber BDD |
 | Test Style | Data Driven |
-| Communication | Socket Programming |
+| Communication | QuickFIX/J |
 | Validation | JUnit Assert |
 | Build Tool | Maven |
+| Reporting Tool | Allure Report |
 
 ---
 
-# Current Enterprise-Level Features
+# Current Implemented Enterprise-Level Features
 
-Implemented:
+## Session Management
+- Client FIX Session Startup
+- Receiver FIX Session Startup
+- Session Shutdown
+- QuickFIX/J Integration
 
-- Dynamic FIX templates
-- Config-driven framework
-- Sender-side validation
-- Receiver-side validation
-- Dynamic FIX parsing
-- Data-driven validation
-- Socket-level communication
-- Runtime placeholder replacement
+## Order Lifecycle
+- New Order
+- Order Modification
+- Order Cancellation
+
+## Message Validation
+
+Validation at:
+- Client Response Side
+- Receiver Message Side
+
+## Reporting
+- Allure Reports
+- Cucumber Reports
 
 ---
 
 # Recommended Future Enhancements
 
-- Session management
-- Sequence numbers
-- Logon/Logout
-- Heartbeats
-- FIX dictionary validation
-- FIX Checksum support
-- Reporting Integration
-- Multi-Exchange Support through external FIX template
+- Excel Driven Testing
+- Multiple FIX Sessions
+- FIX Dictionary Validation
+- Multi Engine E2E Testing
+- Order Book Validation
+- Jenkins Integration
+- Docker Execution
+
 ---
 
 # Conclusion
